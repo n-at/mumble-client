@@ -143,11 +143,13 @@ class MumbleClient extends EventEmitter {
       this._webrtcSessionId = Date.now()
       this._webrtcSessionVersion = 0
 
+      var webrtcMicStream = this._webrtcMic;
+
       this._pc = new window.RTCPeerConnection({
         sdpSemantics: 'unified-plan'
       })
-      this._webrtcMic.getTracks().forEach(function(track) {
-        this._pc.addTrack(track, this._webrtcMic)
+      webrtcMicStream.getTracks().forEach(function(track) {
+        this._pc.addTrack(track, webrtcMicStream)
       })
       this._pc.onicecandidate = (event) => {
         if (event.candidate && event.candidate.candidate) {

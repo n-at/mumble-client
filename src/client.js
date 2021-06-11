@@ -143,21 +143,12 @@ class MumbleClient extends EventEmitter {
       this._webrtcSessionId = Date.now()
       this._webrtcSessionVersion = 0
 
-      var rtcPeerConnection = undefined;
-      if (window.RTCPeerConnection === undefined) {
-        if (window.webkitRTCPeerConnection === undefined) {
-          throw Error('WebRTC not supported');
-        } else {
-          rtcPeerConnection = window.webkitRTCPeerConnection;
-        }
-      } else {
-        rtcPeerConnection = window.RTCPeerConnection;
-      }
-
-      this._pc = new rtcPeerConnection({
+      this._pc = new window.RTCPeerConnection({
         sdpSemantics: 'unified-plan'
       })
-      this._pc.addStream(this._webrtcMic)
+      this._webrtcMic.getTracks().forEach(function(track) {
+        this._pc.addTrack(track, this._webrtcMic)
+      })
       this._pc.onicecandidate = (event) => {
         if (event.candidate && event.candidate.candidate) {
           this._send({

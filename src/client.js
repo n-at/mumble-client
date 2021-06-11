@@ -143,15 +143,14 @@ class MumbleClient extends EventEmitter {
       this._webrtcSessionId = Date.now()
       this._webrtcSessionVersion = 0
 
-      var webrtcMicStream = this._webrtcMic;
-
-      this._pc = new window.RTCPeerConnection({
+      let webrtcMicStream = this._webrtcMic;
+      let rtcPeerConnection = new window.RTCPeerConnection({
         sdpSemantics: 'unified-plan'
       })
       webrtcMicStream.getTracks().forEach(function(track) {
-        this._pc.addTrack(track, webrtcMicStream)
+        rtcPeerConnection.addTrack(track, webrtcMicStream)
       })
-      this._pc.onicecandidate = (event) => {
+      rtcPeerConnection.onicecandidate = (event) => {
         if (event.candidate && event.candidate.candidate) {
           this._send({
             name: 'IceCandidate',
@@ -161,7 +160,7 @@ class MumbleClient extends EventEmitter {
           })
         }
       }
-      this._pc.ontrack = (event) => {
+      rtcPeerConnection.ontrack = (event) => {
         // This is how it should ideally work:
         // this._webrtcAudioCtx.createMediaStreamSource(event.streams[0])
         //   .connect(this._webrtcAudioCtx.destination)
@@ -171,6 +170,7 @@ class MumbleClient extends EventEmitter {
         elem.srcObject = event.streams[0]
         elem.play()
       }
+      this._pc = rtcPeerConnection;
     }
 
     this._dataPingInterval = options.dataPingInterval || 5000
